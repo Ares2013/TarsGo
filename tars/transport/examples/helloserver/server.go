@@ -3,12 +3,15 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"tars/transport"
 	"time"
+
+	"github.com/TarsCloud/TarsGo/tars/transport"
 )
 
+//MyServer struct for testing tars tcp server
 type MyServer struct{}
 
+//Invoke recv request and make response.
 func (s *MyServer) Invoke(req []byte) (rsp []byte) {
 	fmt.Println("recv", string(req))
 	rsp = make([]byte, 4)
@@ -18,6 +21,7 @@ func (s *MyServer) Invoke(req []byte) (rsp []byte) {
 	return
 }
 
+//ParsePackage parse package from buff,check if tars package finished.
 func (s *MyServer) ParsePackage(buff []byte) (pkgLen, status int) {
 	if len(buff) < 4 {
 		return 0, transport.PACKAGE_LESS
@@ -33,6 +37,7 @@ func (s *MyServer) ParsePackage(buff []byte) (pkgLen, status int) {
 	return int(length), transport.PACKAGE_FULL
 }
 
+//InvokeTimeout how to detail with timeout package.
 func (s *MyServer) InvokeTimeout(pkg []byte) []byte {
 	payload := []byte("timeout")
 	ret := make([]byte, 4+len(payload))
@@ -43,9 +48,9 @@ func (s *MyServer) InvokeTimeout(pkg []byte) []byte {
 
 func main() {
 	conf := &transport.TarsServerConf{
-		Proto:         "tcp",
-		Address:       "localhost:3333",
-		MaxAccept:     500,
+		Proto:   "tcp",
+		Address: "localhost:3333",
+		//MaxAccept:     500,
 		MaxInvoke:     20,
 		AcceptTimeout: time.Millisecond * 500,
 		ReadTimeout:   time.Millisecond * 100,

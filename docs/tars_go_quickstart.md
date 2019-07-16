@@ -2,7 +2,7 @@
 
 ## 环境搭建
 
-tars基础组件安装参考tars_install.sh
+tars基础组件安装参考[部署](https://github.com/TarsCloud/Tars/tree/master/deploy)
 
 Golang环境准备，tarsgo要求golang版本在1.9.x及以上。
 
@@ -81,7 +81,7 @@ TARS管理系统的菜单树下，有以下功能：
 
 ### 创建服务
 
-运行create_tars_server.sh脚本，自动创建服务必须的文件。
+运行create_tars_server.sh脚本，自动创建服务必须的文件, 执行过程中如果出现语法错误尝试使用`dos2unix create_tars_server.sh`进行转码。
 
 ```shell
 sh $GOPATH/src/github.com/TarsCloud/TarsGo/tars/tools/create_tars_server.sh [App] [Server] [Servant]
@@ -278,6 +278,5 @@ func main() {
 点击“发布”，服务开始发布，发布成功后，出现下面的界面，如下图：
 
 ![service_ok](../docs/images/tars_go_quickstart_service_ok.png)
-
 
 

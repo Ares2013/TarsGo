@@ -2,13 +2,17 @@ package tars
 
 import (
 	"fmt"
-	logger "github.com/TarsCloud/TarsGo/tars/util/rogger"
 	"strings"
+
+	"github.com/TarsCloud/TarsGo/tars/util/debug"
+	logger "github.com/TarsCloud/TarsGo/tars/util/rogger"
 )
 
+//Admin struct
 type Admin struct {
 }
 
+//Shutdown shutdown all servant by admin
 func (a *Admin) Shutdown() error {
 	for obj, s := range goSvrs {
 		TLOG.Debug("shutdown", obj)
@@ -19,8 +23,10 @@ func (a *Admin) Shutdown() error {
 	return nil
 }
 
+//Notify handler for cmds from admin
 func (a *Admin) Notify(command string) (string, error) {
 	cmd := strings.Split(command, " ")
+	go reportNotifyInfo("AdminServant::notify:" + cmd[0])
 	switch cmd[0] {
 	case "tars.viewversion":
 		return GetServerConfig().Version, nil
@@ -37,6 +43,9 @@ func (a *Admin) Notify(command string) (string, error) {
 		case "NONE":
 			logger.SetLevel(logger.OFF)
 		}
+		return fmt.Sprintf("%s succ", command), nil
+	case "tars.dumpstack":
+		debugutil.DumpStack(true, "stackinfo")
 		return fmt.Sprintf("%s succ", command), nil
 	case "tars.loadconfig":
 		cfg := GetServerConfig()
@@ -57,6 +66,7 @@ func (a *Admin) Notify(command string) (string, error) {
 	}
 }
 
+//RegisterAdmin register admin functions
 func RegisterAdmin(name string, fn adminFn) {
 	adminMethods[name] = fn
 }

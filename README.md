@@ -1,35 +1,39 @@
-# Tarsgo  Document
-
+# TarsGo  Document
+[点我查看中文版](README.zh.md)
 ## About
 - Tarsgo is high performance RPC framework in Golang programing language using the tars protocol.
 - Go has become popular for programming with the rise of containerization technology such as docker, k8s, and etcd.
 - Go's goroutine concurrency mechanism means Go is very suitable for large-scale high-concurrency back-end server program development. The Go language has near C/C++ performance and near Python productivity.
 - At Tencent, part of the existing C++ development team has gradually turned into Go developers. Tars, a widely used RPC framework, supports C++, Java, NodeJS, and PHP, and now Go. The combination with Go language has become a general trend. Therefore, in the voice of users, we launched Tarsgo, and we have applied to Tencent map application, YingYongbao application, Internet plus and other projects.
 
-- Learn more about the whole Tars architecture and design at [Introduction](https://github.com/TarsCloud/Tars/blob/master/Introduction.en.md).
+- Learn more about the whole Tars architecture and design at [Introduction](https://github.com/TarsCloud/Tars/blob/master/Introduction.md).
 
 
-## Functional characteristics
-- Tars2go tool: tars file is automatically generated and converted into Go language, contains RPC server/client code; implemented in Go.
-- Serialization and deserialization of tars in Go.
-- The server supports heartbeat report, stat monitoring report, custom command processing, basic logging.
-- The client supports direct connection and route access, automatic reconnection, periodic refresh of node status, and also support for UDP/TCP protocol.
-- The support of remote log.
-- The support of property report.
+## Function & features
+- Tars2go tool: tars file is automatically generated and converted into Go language, contains RPC server/client code; 
+- Serialization and deserialization of tars protocol in Go.
+- Auto service discovery.
+- TCP/UDP/Http server & Client.
+- The support of local logging and remote logging.
+- The support of statistical reporting,  property statistics,and anormaly reporting.
 - The support of set division.
-
+- The support of protocol buffers. See more in [pb2tarsgo](tars/tools/pb2tarsgo/README.md)
+- The support of filter.
+- The support of zipkin opentracing.
 
 
 ## Install
-- For install OSS and other basic server, see the [Installation](https://github.com/TarsCloud/Tars/blob/master/Install.md) document.
+- For install OSS and other basic servers, see the [Installation](https://github.com/TarsCloud/Tars/blob/master/Install.md) document.
+For quick install OSS and other basic servers, see more about [Deploy](https://github.com/TarsCloud/Tars/tree/master/deploy)
 - Requires Go 1.9.x or above (see https://golang.org/doc/install for help installing Go)
 - go get -u github.com/TarsCloud/TarsGo/tars
 
 
 ## Quickstart
-- For quickstart ,see [tars_go_quickstart_en.md](docs/tars_go_quickstart_en.md)
-- 快速开始，请查看 [tars_go_quickstart.md](docs/tars_go_quickstart.md)
+- For quickstart, see [tars_go_quickstart_en.md](docs/tars_go_quickstart_en.md)
 
+## Performance
+- For performance, see [tars_go_performance.md](docs/tars_go_performance.md)
 
 ## Usage
 ### 1 server
@@ -39,12 +43,12 @@
 
 Create a tars file, like hello.tars, under $GOPATH/src (for example, $GOPATH/src/TestApp/TestServer/hello.tars).
 
-For more detail about tars protocol, see https://github.com/TarsCloud/TarsProtocol/blob/master/docs-en/tars_protocol.md 
+For more detail about tars protocol, see [tars_protocol](https://github.com/TarsCloud/TarsProtocol/blob/master/docs-en/tars_protocol.md)
+Tars protocol is a binary ,IDL-based protocol similar to protocolbuffers.
 	
-```
-	
-	module TestApp
-	{
+```go
+module TestApp
+{
 	
 	interface Hello
 	{
@@ -52,23 +56,21 @@ For more detail about tars protocol, see https://github.com/TarsCloud/TarsProtoc
 	    int testHello(string sReq, out string sRsp);
 	};
 	
-	}; 
-	
+};	
 ```
 	
 
 #### 1.2 compile interface definition file
 
 ##### 1.2.1 build tars2go
-Compile the tars2go tools and copy tars2go binary to into a directory in your $PATH.
+Compile and install the tars2go tools.
 
-    cd $GOPATH/src/github.com/TarsCloud/TarsGo/tars/tools/tars2go && go build . 
-    cp tarsgo $GOPTAH/bin 
+    go install $GOPATH/src/github.com/TarsCloud/TarsGo/tars/tools/tars2go
 
 ##### 1.2.2 compile the tars file and translate into go file
 	tars2go --outdir=./vendor hello.tars
 #### 1.3 implement the interface
-```
+```go
 package main
 
 import (
@@ -100,8 +102,6 @@ func main() { //Init servant
     app.AddServant(imp, cfg.App+"."+cfg.Server+".HelloObj") //Register Servant
     tars.Run()
 }
-
-
 ```
 
 illustration:
@@ -115,7 +115,7 @@ illustration:
 #### 1.4 ServerConfig
 
 tars.GetServerConfig()  return a server config,which is defined as below:
-```
+```go
 type serverConfig struct {
 	Node      string
 	App       string
@@ -163,7 +163,7 @@ type serverConfig struct {
 - Setdivision: To specify  which set division ,like gray.sz.*
 
 A server side configuration look like:
-```
+```xml
 <tars>
   <application>
       enableset=Y
@@ -196,7 +196,7 @@ app.AddServant(imp, cfg.App+"."+cfg.Server+".HelloObj") in the server implement 
 the adapter configuration and implement for the HelloObj.
 A full example for adapter, see below:
 
-```
+```xml
 <tars>
   <application>
     <server>
@@ -230,13 +230,13 @@ A full example for adapter, see below:
 #### 1.6 start the server 
 
 The command for starting the server：
-```
+```bash
 ./HelloServer --config=config.conf
 ```
 See below for a full example of config.conf ,We will explain the client side configuration later.
 
 
-```
+```xml
 <tars>
   <application>
     enableset=n
@@ -288,7 +288,7 @@ See below for a full example of config.conf ,We will explain the client side con
 User can write a client side code easily without writing any protocol-specified communicating code.
 #### 2.1 client example
 A  client side example:
-```
+```go
 package main
 
 import (
@@ -329,7 +329,7 @@ illustration:
 #### 2.2 communicator
 A communicator represent a group of resources for sending and receiving packages for the client side, which in the end manages the socket communicating for each object.
 U will only need one communicator in a program.
-```
+```go
 var comm *tars.Communicato
 comm = tars.NewCommunicator()
 comm.SetProperty("property", "tars.tarsproperty.PropertyObj")
@@ -354,7 +354,7 @@ Communicator attribute description:
 > * modulename:The module name, the default value is the name of the executable program.
 
 The format of the communicator's configuration file is as follows:
-```
+```xml
 <tars>
   <application>
     #The configuration required by the proxy
@@ -383,10 +383,10 @@ The format of the communicator's configuration file is as follows:
 ```
 #### 2.3 Timeout control
 if u want to use timeout control in the client side, use TarsSetTimeout which in ms.
-```
-    app := new(TestApp.Hello)
-    comm.StringToProxy(obj, app)
-    app.TarsSetTimeout(3000)
+```go
+app := new(TestApp.Hello)
+comm.StringToProxy(obj, app)
+app.TarsSetTimeout(3000)
 ```
 
 #### 2.4  Call interface
@@ -414,17 +414,17 @@ tcp:Tcp protocol
 -p:Port, here is 9985
 
 If HelloServer is running on two servers, app is initialized as follows:
-```
-    obj:= "Test.HelloServer.HelloObj@tcp -h 127.0.0.1 -p 9985:tcp -h 192.168.1.1 -p 9983"
-    app := new(TestApp.Hello)
-    comm.StringToProxy(obj, app)
+```go
+obj:= "Test.HelloServer.HelloObj@tcp -h 127.0.0.1 -p 9985:tcp -h 192.168.1.1 -p 9983"
+app := new(TestApp.Hello)
+comm.StringToProxy(obj, app)
 ```
 The address of HelloObj is set to the address of the two servers. At this point, the request will be distributed to two servers (distribution method can be specified, not introduced here). If one server is down, the request will be automatically assigned to another one, and the server will be restarted periodically.
 
 For services registered in the master, the service is addressed based on the service name. When the client requests the service, it does not need to specify the specific address of the HelloServer, but it needs to specify the address of the `registry` when generating the communicator or initializing the communicator.
 
 The following shows the address of the registry by setting the parameters of the communicator:
-```
+```go
 var *tars.Communicator
 comm = tars.NewCommunicator()
 comm.SetProperty("locator", "tars.tarsregistry.QueryObj@tcp -h ... -p ...")
@@ -434,7 +434,7 @@ Since the client needs to rely on the registry's address, the registry must also
 TODO. Unsupported yet in tarsgo.
 
 ##### 2.4.3. Synchronous call
-```
+```go
 package main
 
 import (
@@ -463,7 +463,8 @@ func main() {
 
 ##### 2.4.4 Asynchronous call
 tarsgo can use Asynchronous call easily using go routine. Unlike cpp, we don't need to implement a callback function.
-```
+
+```go
 package main
 
 import (
@@ -501,7 +502,7 @@ Since multiple servers can be deployed, client requests are randomly distributed
 
 
 ### 3   return code defined by tars.
-```
+```go
 //Define the return code given by the TARS service
 const int TARSSERVERSUCCESS       = 0;    //Server-side processing succeeded
 const int TARSSERVERDECODEERR     = -1;   //Server-side decoding exception
@@ -524,7 +525,7 @@ const int TARSSERVERUNKNOWNERR    = -99;  //The server is in an abnormal positio
 ### 4 log
 
 A quick example for using tarsgo rotating log
-```
+```go
 TLOG := tars.GetLogger("TLOG")
 TLOG.Debug("Debug logging")
 ```
@@ -532,13 +533,13 @@ This is will create a *Rogger.Logger ,which was defined in tars/util/rogger, and
 
 if u don't want to rotate log by file size. For example , u want to rotate by day, then use:
 
-```
+```go
 TLOG := tars.GetDayLogger("TLOG",1)
 TLOG.Debug("Debug logging")
 ```
 for rotating by hour, use GetHourLogger("TLOG",1).
 If u  want to log to remote server ,which is defined in config.conf named tars.tarslog.LogObj. A full tars file definition can be found in tars/protocol/res/LogF.tars. U have to setup  a log server before doing this. A log server can be found under Tencent/Tars/cpp/framework/LogServer .A quick  example，
-```
+```go
 TLOG := GetRemoteLogger("TLOG")
 TLOG.Debug("Debug logging")
 
@@ -552,7 +553,7 @@ The Tars server framework supports dynamic receiving commands to handle related 
 tarsgo  currently has tars.viewversion / tars.setloglevel administration commands for now. User can send admin command from oss to see what version is  or setting loglevel mentioned about.
 
 if u want to defined ur own admin commands, see this example
-```
+```go
 func helloAdmin(who string ) (string, error) {
 	return who, nil
 }
@@ -563,7 +564,7 @@ Then u can send self-defined admin command "tars.helloAdmin  tarsgo" and tarsgo
  will be shown in browser.
 
 Illustration:
-```
+```go
 // A function  should be in this format
 type adminFn func(string) (string, error)
 
@@ -579,7 +580,7 @@ Reporting statistics information is the logic of reporting the time-consuming in
 After the client call the reporting interface, it is temporarily stored in memory. When it reaches a certain time point, it is reported to the tarsstat service (the default is once reporting 1 minute). We call the time gap between the two reporting time points as a statistical interval, and perform the operations such as accumulating and comparing the same key in a statistical interval.
 The sample code is as follows:
 
-```
+```go
 //for error
 ReportStat(msg, 0, 1, 0)
 
@@ -603,7 +604,7 @@ after every client call server ，no matter success or failure. And the success 
 For better monitoring, the TARS framework supports reporting abnormal situation directly to tarsnotify in the program and can be viewed on the WEB management page.
 
 The framework provides three macros to report different kinds of exceptions:
-```
+```go
 tars.reportNotifyInfo("Get data from mysql error!")
 ```
 Info is a string, which can directly report the string to tarsnotify. The reported string can be seen on the page, subsequently, we can alarm according to the reported information.
@@ -623,7 +624,7 @@ The types of statistics currently supported include the following:
 > * Count(count) //calculate the count of  report times
 
 The sample code is as follows:
-```
+```go
     sum := tars.NewSum()
     count := tars.NewCount()
     max := tars.NewMax()
@@ -648,7 +649,7 @@ Description:
 User can setup remote configuration from OSS. See more detail in https://github.com/TarsCloud/TarsFramework/blob/master/docs-en/tars_config.md . 
 That is an example to illustrate how to use this api to get configuration file from remote.
 
-```
+```go
 import "github.com/TarsCloud/TarsGo/tars"
 ...
 cfg := tars.GetServerConfig()
@@ -662,7 +663,7 @@ config, _ := remoteConf.GetConfig("test.conf")
 ### 10 setting.go
 setting.go in package tars  is used to control tarsgo performance and characteristics .Some option should be updated from Getserverconfig().
 
-```
+```go
 //number of worker routine to handle client request
 //zero means  no control ,just one goroutine for a client request.
 //runtime.NumCpu() usually best performance in the benchmark.
@@ -719,3 +720,147 @@ const (
 
 
 ```
+
+### 11 HTTP Support
+
+`tars.TarsHttpMux` is multiplexer like [http.ServeMux](https://golang.org/pkg/net/http/#ServeMux)，the `pattern` parameter is used as the interface name in monitoring report. 
+
+Here is a sample of http server：
+
+```go
+package main
+
+import (
+	"net/http"
+	"github.com/TarsCloud/TarsGo/tars"
+)
+
+func main() {
+	mux := &tars.TarsHttpMux{}
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello tafgo"))
+	})
+
+    cfg := tars.GetServerConfig()
+	tars.AddHttpServant(mux, cfg.App+"."+cfg.Server+".HttpObj") //Register http server
+	tars.Run()
+}
+
+
+```
+
+###  12 Using Context
+### context
+In the past, TarsGo did not use context in the generated client code, or in the implementation code passed in by the user. This makes us want to pass some framework information, such as client ip, port, etc., or the user passes some information about the call chain to the framework, which is difficult to implement. Through a refactoring of the interface, the context is supported, and the these information  will be implemented through the context. This refactoring is designed to be compatible with older user behavior and is fully compatible.
+
+
+Server use context
+
+```go
+type ContextTestImp struct {
+}
+//only need to add  ctx context.Context parameter
+func (imp *ContextTestImp) Add(ctx context.Context, a int32, b int32, c *int32) (int32, error) {
+	//We can use context to get some usefull infomation we need ,such Client ,ip ,port and tracing infomation
+	//read more detail under tars/util/current
+	ip, ok := current.GetClientIPFromContext(ctx)
+    if !ok {
+        logger.Error("Error getting ip from context")
+    }  
+	return 0, nil
+}
+//just change AddServant into AddServantWithContext
+app.AddServantWithContext(imp, cfg.App+"."+cfg.Server+".ContextTestObj")
+```
+
+Client use context
+
+```go
+
+    ctx := context.Background()
+    c := make(map[string]string)
+    c["a"] = "b" 
+// juse change app.Add into app.AddWithContext, now u can pass context to framework, 
+//if u want to setting request package's context,u can pass a optional parameter ,just like c，which is  ...[string]string
+    ret, err := app.AddWithContext(ctx, i, i*2, &out, c)
+
+```
+Read full demo client and server under  examples/ContextTestServer
+
+
+### 13 filter & zipkin plugin 
+For supporting writing plugin，we add filter to the framework. We have client filter and server filter. 
+
+```go
+//ServerFilter ,dispatch and f is passed as parameter ， for dispatching user's implement. 
+//req and resp is  
+type ServerFilter func(ctx context.Context, d Dispatch, f interface{}, req *requestf.RequestPacket, resp *requestf.ResponsePacket, withContext bool) (err error)
+//
+type ClientFilter func(ctx context.Context, msg *Message, invoke Invoke, timeout time.Duration) (err error)
+//RegisterServerFilter registers the server side filter
+//func RegisterServerFilter(f ServerFilter)
+//RegisterClientFilter registers the client side filter
+//func RegisterClientFilter(f ClientFilter)
+
+```
+
+Having these filters ，now we can add opentracing for every request.
+Let's take a look at client side filter for opentracing.
+```go
+//ZipkinClientFilter returns a client side tars filter, for hooking zipking opentracing.
+func ZipkinClientFilter() tars.ClientFilter {
+	return func(ctx context.Context, msg *tars.Message, invoke tars.Invoke, timeout time.Duration) (err error) {
+		var pCtx opentracing.SpanContext
+		req := msg.Req
+		//If span context is passed in the context, we use this context as parent span ,else start a new span.
+		//The method name of the rpc request , is used as span's name .
+		if parent := opentracing.SpanFromContext(ctx); parent != nil {
+			pCtx = parent.Context()
+		}
+		cSpan := opentracing.GlobalTracer().StartSpan(
+			req.SFuncName,
+			opentracing.ChildOf(pCtx),
+			ext.SpanKindRPCClient,
+		)
+		defer cSpan.Finish()
+		cfg := tars.GetServerConfig()
+
+		//set additional information for the span ,like method, interface, protocol, vesion, ip and port etc.
+		cSpan.SetTag("client.ipv4", cfg.LocalIP)
+		cSpan.SetTag("tars.interface", req.SServantName)
+		cSpan.SetTag("tars.method", req.SFuncName)
+		cSpan.SetTag("tars.protocol", "tars")
+		cSpan.SetTag("tars.client.version", tars.TarsVersion)
+
+		//inject the span context into the request package's status ,which is map[string]string
+		if req.Status != nil {
+			err = opentracing.GlobalTracer().Inject(cSpan.Context(), opentracing.TextMap, opentracing.TextMapCarrier(req.Status))
+			if err != nil {
+				logger.Error("inject span to status error:", err)
+			}
+		} else {
+			s := make(map[string]string)
+			err = opentracing.GlobalTracer().Inject(cSpan.Context(), opentracing.TextMap, opentracing.TextMapCarrier(s))
+			if err != nil {
+				logger.Error("inject span to status error:", err)
+			} else {
+				req.Status = s
+			}
+		}
+		//Nothing tho change , just invoke the request.
+		err = invoke(ctx, msg, timeout)
+		if err != nil {
+			//invoke error ,logging the error information to the span.
+			ext.Error.Set(cSpan, true)
+			cSpan.LogFields(oplog.String("event", "error"), oplog.String("message", err.Error()))
+		}
+
+		return err
+	}
+```
+
+
+Server will add a filters ,which exact the span context from the reqeust pacakge's status, and start a new span.
+
+Reqed more under TarsGo/tars/plugin/zipkintracing
+For client side and server side example code , read ZipkinTraceClient & ZipkinTraceServer under the examples.

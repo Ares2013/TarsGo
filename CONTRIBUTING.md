@@ -1,7 +1,10 @@
 # Contributing to TarsGo
 
+## 0 All pull request must go to dev branch, not master.
+All pull request must use dev branch as base branch, not master , master is used for publishing.
 
 ## 1 Create an issue 
+Use English as u can.
   
 if you want to report a bug, use this template in issue:
 ```
@@ -40,7 +43,7 @@ Add any other context or screenshots about the feature request here.
 
 ## 2 fork the project
 click the fork button on the right top of the project.
-![fork button](tars/docs/images/fork_button.png)
+![fork button](docs/images/fork_button.png)
 
 ## 3 create a pull request
 if you want to create a pull request, you must create a issue first. 

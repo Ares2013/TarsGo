@@ -1,9 +1,14 @@
 package model
 
-import "github.com/TarsCloud/TarsGo/tars/protocol/res/requestf"
+import (
+	"context"
 
+	"github.com/TarsCloud/TarsGo/tars/protocol/res/requestf"
+)
+
+//Servant is interface for call the remote server.
 type Servant interface {
-	Tars_invoke(ctype byte,
+	Tars_invoke(ctx context.Context, ctype byte,
 		sFuncName string,
 		buf []byte,
 		status map[string]string,
